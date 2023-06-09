@@ -7,5 +7,3 @@ Attacks on 5-round ChaCha:
 Attacks on 6-round ChaCha:
 	Compile: g++ -O3 ./key_recovery_chacha6_64.cpp -o key_recovery_chacha6
 	Run: ./key_recovery_chacha6
-
-Tip: Please click the "Raw" button to download the file 'report_experiments.pdf'
