@@ -30,7 +30,6 @@ mt19937 gen((unsigned int) time(NULL)); //seed random generator every time
 uint64_t NIV;
 /*the number of random keys*/
 uint64_t NK;
-const double CNIV=128.0;
 
 
 int wt_cut=13;
@@ -157,7 +156,7 @@ void DetermineSyncopatedSegment(int signPNB[SIZE_KEY],int signPNB_syncopation[SI
 	int zeroRuns[SIZE_KEY][2];
 	int numZeorRuns=GetZeroRuns_InWord(zeroRuns,signPNB);
 
-	//Second, determine the syncopated segments and restricted syncopations (in the secret key) where we apply the syncopation technique
+	//Second, determine the syncopated segments and restricted segments (in the secret key) where we apply the syncopation technique
 	if(flagDetails==1) printf("		-- the syncopated segments of secret key where the syncopation technique are applied: \n");
 	numSyncopatedSegments[0]=0; //numSyncopatedSegments_secret_key
 	numSyncopatedSegments[1]=0; //and numSyncopatedSegments_all
@@ -171,7 +170,7 @@ void DetermineSyncopatedSegment(int signPNB[SIZE_KEY],int signPNB_syncopation[SI
 					/*Still impose one-bit restriction/condition in this case, 
 						One more key bit is used to update the value instead of filtering the data.*/
 					signPNB_syncopation[zeroRuns[i][0]]=2;
-					//index for restricted syncopations of key bits in state
+					//index for restricted segments of key bits in state
 					indexRestrictedSegments[numSyncopatedSegments[0]][0]=1;
 					indexRestrictedSegments[numSyncopatedSegments[0]][1]=128+zeroRuns[i][0];
 	 				syncopatedSegments[numSyncopatedSegments[0]][0]=128+zeroRuns[i][0]+1;
@@ -190,7 +189,7 @@ void DetermineSyncopatedSegment(int signPNB[SIZE_KEY],int signPNB_syncopation[SI
 
 					// signPNB_syncopation[zeroRuns[i][0]]=2;
 					// signPNB_syncopation[zeroRuns[i][0]+1]=2;
-					// //index for restricted syncopations of key bits in state
+					// //index for restricted segments of key bits in state
 					// indexRestrictedSegments[numSyncopatedSegments[0]][0]=2;
 					// indexRestrictedSegments[numSyncopatedSegments[0]][1]=128+zeroRuns[i][0];
 	 			// 	syncopatedSegments[numSyncopatedSegments[0]][0]=128+zeroRuns[i][0]+2;
@@ -209,7 +208,7 @@ void DetermineSyncopatedSegment(int signPNB[SIZE_KEY],int signPNB_syncopation[SI
 				}
 				else{ // impose one-bit restriction/condition in this case
 					signPNB_syncopation[zeroRuns[i][0]]=2;
-					//index for restricted syncopations of key bits in state
+					//index for restricted segments of key bits in state
 					indexRestrictedSegments[numSyncopatedSegments[0]][0]=1;
 					indexRestrictedSegments[numSyncopatedSegments[0]][1]=128+zeroRuns[i][0];
  					syncopatedSegments[numSyncopatedSegments[0]][0]=128+zeroRuns[i][0]+1;
@@ -233,7 +232,7 @@ void DetermineSyncopatedSegment(int signPNB[SIZE_KEY],int signPNB_syncopation[SI
 			else{ // zeroRuns[i][1]=1, and can only impose one-bit restriction/condition in this case
 				if( ((zeroRuns[i][0]+1)-(zeroRuns[i][0]/SIZE_WORD)*SIZE_WORD) < SIZE_WORD ){ //exclue the case we obtain no grain by imposing one-bit restrictions/conditions
 					signPNB_syncopation[zeroRuns[i][0]]=2;
-					//index for restricted syncopations of key bits in state
+					//index for restricted segments of key bits in state
 					indexRestrictedSegments[numSyncopatedSegments[0]][0]=1;
 					indexRestrictedSegments[numSyncopatedSegments[0]][1]=128+zeroRuns[i][0];
 	 				syncopatedSegments[numSyncopatedSegments[0]][0]=128+zeroRuns[i][0]+1;
@@ -256,7 +255,7 @@ void DetermineSyncopatedSegment(int signPNB[SIZE_KEY],int signPNB_syncopation[SI
 			}
 			if(flagDetails==1) 
 				if(numSyncopatedSegments[0]>0)
-					printf("			--> %d-th syncopation (%d-bit type), at %d, and segment is (%d,%d)\n",\
+					printf("			--> %d-th restricted position of secret key (%d-bit restricted segment), at %d, and segment is (%d,%d)\n",\
 						numSyncopatedSegments[0],indexRestrictedSegments[numSyncopatedSegments[0]-1][0],
 						indexRestrictedSegments[numSyncopatedSegments[0]-1][1]-128,\
 						syncopatedSegments[numSyncopatedSegments[0]-1][0]-128,\
@@ -595,7 +594,7 @@ double EstimateApproxCPNBs_single(double numIVsExp,double num_target,double num_
 			uint32_t Z[16];
 			chacha_block_reduced(Z,X.input,numTarget);
 
-			/*Check whether the restrictions/conditions on restricted syncopations hold.*/
+			/*Check whether the restrictions/conditions on restricted segments hold.*/
 			int flagRestrictedC;
 			if(flagSYNC==1) flagRestrictedC=CheckRestrictedConditions(Z,X.input,numSyncopatedSegments,indexRestrictedSegments);
 			else flagRestrictedC=1;
@@ -642,7 +641,7 @@ double EstimateApproxCPNBs_single(double numIVsExp,double num_target,double num_
 	return res;
 }
 
-void Verification_BackApprox(double rounds_target,double rounds_diff,int OD,double epsilon_d_abs){
+void Verification_BackApprox(double rounds_target,double rounds_diff,int OD){
 	int numCPNBs;
 	double numIVsExp;
 
@@ -682,7 +681,7 @@ void Verification_BackApprox(double rounds_target,double rounds_diff,int OD,doub
 	for(i=0;i<SIZE_KEY;i++) signCPNB_final[i]=0;
 	for(i=0;i<numCPNBs_final;i++) signCPNB_final[arrayCPNBs_final[i]]=1;
 
-	/*Algorithm 1: determine syncopated segments and restricted syncopations.*/
+	/*Algorithm 1: determine syncopated segments and restricted segments.*/
 	int numSyncopatedSegments[2];
 	int indexRestrictedSegments[SIZE_KEY][2];
 	int syncopatedSegments[SIZE_KEY][2];
@@ -691,7 +690,7 @@ void Verification_BackApprox(double rounds_target,double rounds_diff,int OD,doub
 	DetermineSyncopatedSegment(signCPNB_final,signCPNB_syncopation,numSyncopatedSegments,theta,indexRestrictedSegments,syncopatedSegments);
 	
 
-	/*According to Lemmas 1 and 2, if restrictions/conditions on restricted syncopatoins are satisfied, then the syncopated segments are independent with PNBs and known.
+	/*According to Lemmas 1 and 2, under the condition that equations are satisfied, the syncopated segments are independent with PNBs and known.
 		Thus, theoretically estimate the backward correlation on the premise that the values of syncopated segments are known.*/
 	double epsilon_a_abs_median_single=EstimateApproxCPNBs_single_theoretical(numIVsExp,rounds_target,rounds_diff,OD,arrayCPNBs_final,numCPNBs_final,syncopatedSegments,numSyncopatedSegments[0]);
 	printf("	- |\\epsilon'_a|=%lf (2^{%.4f})\n\n\n",epsilon_a_abs_median_single,log(epsilon_a_abs_median_single)/log(2));
@@ -707,7 +706,7 @@ void Verification_BackApprox(double rounds_target,double rounds_diff,int OD,doub
 void AttackOnChaCha7(){
 	double rounds_target=7;
 	double rounds_diff=3.5;
-	printf("Attacking %.1f rounds reduced ChaCha with %.1f rounds truncated differential and %.1f rounds backwards approximation equipped with syncopation thechnique:\n\n", rounds_target,rounds_diff,rounds_target-rounds_diff);
+	printf("Attacking %.1f rounds reduced ChaCha with %.1f rounds truncated differential and %.1f rounds backwards approximation equipped with syncopation technique:\n\n", rounds_target,rounds_diff,rounds_target-rounds_diff);
 	
 	printf("\n ###########################  BEGIN  ################################# \n\n");
 	/*STEP 1: truncated difference in forwards direction*/
@@ -720,11 +719,11 @@ void AttackOnChaCha7(){
 
 
 	/*STEP2: approximation with syncopation technique in backward direction*/
-	printf("Backward approximation with syncopation thechnique of 3.5 rounds:\n");
+	printf("Backward approximation with syncopation technique of 3.5 rounds:\n");
 	assert((flag74or89==0) | (flag74or89==1));
 	if(flag74or89==0) printf("	With 74 CPNBs,\n\n");
 	else printf("	With 89 CPNBs,\n\n");
-	Verification_BackApprox(rounds_target,rounds_diff,OD,epsilon_d_abs);
+	Verification_BackApprox(rounds_target,rounds_diff,OD);
 
 	printf("\n #############################  END  ############################### \n\n\n");
 }
